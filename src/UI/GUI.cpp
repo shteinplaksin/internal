@@ -5,6 +5,13 @@
 #include <xostr/xorstr.hpp>
 #include <LazyImporter/lazy_importer.hpp>
 #include <cstring>
+
+// Disable gamepad support to remove XInput strings
+#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
+
+// Obfuscate ImGui version string before including headers
+#define IMGUI_VERSION ""
+
 #include <imgui/imgui.cpp>
 #include <imgui/imgui_draw.cpp>
 #include <imgui/imgui_tables.cpp>
@@ -16,19 +23,39 @@ static bool is_init = false;
 static bool do_draw = true;
 extern HWND g_hwnd;
 
+// Obfuscated ImGui backend function wrappers
+typedef bool(*PFN_ImplWin32_Init)(void*);
+typedef void(*PFN_ImplWin32_Shutdown)(void);
+typedef void(*PFN_ImplWin32_NewFrame)(void);
+typedef bool(*PFN_ImplOpenGL3_Init)(const char*);
+typedef void(*PFN_ImplOpenGL3_Shutdown)(void);
+typedef void(*PFN_ImplOpenGL3_NewFrame)(void);
+typedef void(*PFN_ImplOpenGL3_RenderDrawData)(ImDrawData*);
+
+static PFN_ImplWin32_Init pfn_win32_init = ImGui_ImplWin32_Init;
+static PFN_ImplWin32_Shutdown pfn_win32_shutdown = ImGui_ImplWin32_Shutdown;
+static PFN_ImplWin32_NewFrame pfn_win32_newframe = ImGui_ImplWin32_NewFrame;
+static PFN_ImplOpenGL3_Init pfn_opengl3_init = ImGui_ImplOpenGL3_Init;
+static PFN_ImplOpenGL3_Shutdown pfn_opengl3_shutdown = ImGui_ImplOpenGL3_Shutdown;
+static PFN_ImplOpenGL3_NewFrame pfn_opengl3_newframe = ImGui_ImplOpenGL3_NewFrame;
+static PFN_ImplOpenGL3_RenderDrawData pfn_opengl3_render = ImGui_ImplOpenGL3_RenderDrawData;
+
 bool GUI::init(HWND wnd_handle)
 {
 	if (is_init) return false;
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	ImFont* font = io.Fonts->AddFontFromFileTTF(xorstr_("C:\\Windows\\Fonts\\consola.ttf"), 15.0f);
+	io.IniFilename = nullptr;
+	
+	const char* font_path = xorstr_("C:\\Windows\\Fonts\\consola.ttf");
+	ImFont* font = io.Fonts->AddFontFromFileTTF(font_path, 15.0f);
 	io.FontDefault = font ? font : io.Fonts->AddFontDefault();
 
 	ImGui::StyleColorsDark();
 	applyDarkOrangeTheme();
-	ImGui_ImplWin32_Init(wnd_handle);
-	ImGui_ImplOpenGL3_Init();
+	pfn_win32_init(wnd_handle);
+	pfn_opengl3_init(nullptr);
 	is_init = true;
 	return false;
 }
@@ -36,8 +63,8 @@ bool GUI::init(HWND wnd_handle)
 void GUI::shutdown()
 {
 	if (!is_init) return;
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplWin32_Shutdown();
+	pfn_opengl3_shutdown();
+	pfn_win32_shutdown();
 	ImGui::DestroyContext();
 	is_init = false;
 }
@@ -51,7 +78,7 @@ void GUI::draw()
 	if (insert_is_pressed && !insert_was_pressed) do_draw = !do_draw;
 	insert_was_pressed = insert_is_pressed;
 	
-	ImGui_ImplOpenGL3_NewFrame();
+	pfn_opengl3_newframe();
 	ImGuiIO& io = ImGui::GetIO();
 	
 	static LARGE_INTEGER frequency = {0}, last_time = {0};
@@ -108,7 +135,7 @@ void GUI::draw()
 	if (do_draw) renderMainInterface();
 	ImGui::EndFrame();
 	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	pfn_opengl3_render(ImGui::GetDrawData());
 }
 
 bool GUI::getIsInit() { return is_init; }

@@ -13,7 +13,7 @@ enum class TabId : int { Rage = 0, Visuals, Legit, Misc, Settings, Info, Count }
 
 struct TabDescriptor { TabId id; const char* category; const char* label; };
 
-constexpr std::array<TabDescriptor, static_cast<std::size_t>(TabId::Count)> kTabs{
+std::array<TabDescriptor, static_cast<std::size_t>(TabId::Count)> kTabs{
 	TabDescriptor{ TabId::Rage, xorstr_("Rage"), xorstr_("Ragebot") },
 	TabDescriptor{ TabId::Visuals, xorstr_("Semi-Safe"), xorstr_("Visuals") },
 	TabDescriptor{ TabId::Legit, xorstr_("Semi-Safe"), xorstr_("Legit") },
@@ -29,7 +29,8 @@ void renderMenuBar()
 
 	ImGui::SetCursorPosY(0.0f);
 	ImGui::SetCursorPosX(315.0f);
-	ImGui::TextUnformatted(xorstr_("Internal"));
+	const char* menu_title = xorstr_("Internal");
+	ImGui::TextUnformatted(menu_title);
 
 	ImGui::SetCursorPosY(0.0f);
 	ImGui::SetCursorPosX(605.0f);
@@ -156,8 +157,10 @@ void renderSettingsTab()
 void renderInfoTab()
 {
 	ImGui::SeparatorText(xorstr_("Information"));
-	ImGui::SetCursorPosX(10.0f); ImGui::TextUnformatted(xorstr_("CS2 External build - Dark Orange UI"));
-	ImGui::SetCursorPosX(10.0f); ImGui::TextUnformatted(xorstr_("Status: Running inside BlueStacks 5."));
+	const char* info_line1 = xorstr_("CS2 External build - Dark Orange UI");
+	const char* info_line2 = xorstr_("Status: Running inside BlueStacks 5.");
+	ImGui::SetCursorPosX(10.0f); ImGui::TextUnformatted(info_line1);
+	ImGui::SetCursorPosX(10.0f); ImGui::TextUnformatted(info_line2);
 	ImGui::Spacing();
 
 	ImGui::SetCursorPosX(10.0f);
@@ -205,7 +208,8 @@ void renderSidebar(float contentHeight)
 	ImGui::SetCursorPosY(kSidebarLogoY);
 	ImGui::SetCursorPosX(kSidebarLogoX);
 	ImGui::SetWindowFontScale(1.1f);
-	ImGui::TextUnformatted(xorstr_("isvqq"));
+	const char* logo_text = xorstr_("isvqq");
+	ImGui::TextUnformatted(logo_text);
 	ImGui::SetWindowFontScale(1.0f);
 
 	const ImVec4 activeColor{1.0f, 0.5f, 0.0f, 0.4f};
@@ -265,7 +269,8 @@ void renderMainInterface()
 
 	constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
-	if (ImGui::Begin(xorstr_("CS2"), nullptr, windowFlags))
+	const char* window_title = xorstr_("CS2");
+	if (ImGui::Begin(window_title, nullptr, windowFlags))
 	{
 		const ImVec2 windowPos = ImGui::GetWindowPos();
 		const ImVec2 windowSize = ImGui::GetWindowSize();

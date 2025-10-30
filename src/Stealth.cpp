@@ -41,14 +41,23 @@ void Stealth::ErasePEHeader(HINSTANCE hModule)
 	}
 }
 
+typedef struct _PEB_LDR_DATA_NT {
+	ULONG Length;
+	UCHAR Initialized;
+	PVOID SsHandle;
+	LIST_ENTRY InLoadOrderModuleList;
+	LIST_ENTRY InMemoryOrderModuleList;
+	LIST_ENTRY InInitializationOrderModuleList;
+} PEB_LDR_DATA_NT, *PPEB_LDR_DATA_NT;
+
 bool Stealth::RemoveFromPEB(HINSTANCE hModule)
 {
-	auto NtQueryInformationProcess = LI_FN(NtQueryInformationProcess).cached();
+	auto NtQueryInformationProcess_fn = LI_FN(NtQueryInformationProcess).cached();
 	
 	PROCESS_BASIC_INFORMATION pbi;
 	ULONG ulRetLen = 0;
 	
-	NTSTATUS status = NtQueryInformationProcess(LI_FN(GetCurrentProcess)(), ProcessBasicInformation, &pbi, sizeof(pbi), &ulRetLen);
+	NTSTATUS status = NtQueryInformationProcess_fn(LI_FN(GetCurrentProcess)(), ProcessBasicInformation, &pbi, sizeof(pbi), &ulRetLen);
 	
 	if (status != 0)
 		return false;
@@ -57,7 +66,11 @@ bool Stealth::RemoveFromPEB(HINSTANCE hModule)
 	if (!pPeb)
 		return false;
 
-	PLDR_MODULE pMod = (PLDR_MODULE)pPeb->Ldr->InLoadOrderModuleList.Flink;
+	PPEB_LDR_DATA_NT pLdr = (PPEB_LDR_DATA_NT)pPeb->Ldr;
+	if (!pLdr)
+		return false;
+
+	PLDR_MODULE pMod = (PLDR_MODULE)pLdr->InLoadOrderModuleList.Flink;
 	PLDR_MODULE pStartMod = pMod;
 
 	do
