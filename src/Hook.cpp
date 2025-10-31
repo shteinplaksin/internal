@@ -32,56 +32,83 @@ static bool __stdcall wglSwapBuffers(HDC hDc);
 
 bool Hook::init()
 {
-	if (is_init) return false;
+    __try
+    {
+        if (is_init) return false;
 
-	if (pfn_mh_init() != MH_OK) return true;
-	
-	const char* gl_dll = xorstr_("opengl32.dll");
-	const char* swap_func = xorstr_("wglSwapBuffers");
-	p_swap_buffers = (void*)LI_FN(GetProcAddress)(LI_FN(GetModuleHandleA)(gl_dll), swap_func);
-	if (!p_swap_buffers) return true;
+        if (pfn_mh_init() != MH_OK) return true;
 
-	if (pfn_mh_create(p_swap_buffers, &wglSwapBuffers, (LPVOID*)&origin_wglSwapBuffers) != MH_OK) return true;
-	if (pfn_mh_enable(MH_ALL_HOOKS) != MH_OK) return true;
-	
-	is_init = true;
-	return false;
+        const char* gl_dll = xorstr_("opengl32.dll");
+        const char* swap_func = xorstr_("wglSwapBuffers");
+
+        HMODULE gl_module = LI_FN(GetModuleHandleA)(gl_dll);
+        if (!gl_module)
+        {
+            gl_module = LI_FN(LoadLibraryA)(gl_dll);
+            if (!gl_module)
+                return true;
+        }
+
+        p_swap_buffers = (void*)LI_FN(GetProcAddress)(gl_module, swap_func);
+        if (!p_swap_buffers)
+            return true;
+
+        if (pfn_mh_create(p_swap_buffers, &wglSwapBuffers, (LPVOID*)&origin_wglSwapBuffers) != MH_OK)
+            return true;
+
+        if (pfn_mh_enable(MH_ALL_HOOKS) != MH_OK)
+            return true;
+
+        is_init = true;
+        return false;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return true;
+    }
 }
 
 void Hook::shutdown()
 {
-	if (!is_init) return;
-	if (GUI::getIsInit()) GUI::shutdown();
-	pfn_mh_disable(MH_ALL_HOOKS);
-	if (p_swap_buffers) pfn_mh_remove(p_swap_buffers);
-	is_init = false;
+    if (!is_init) return;
+    if (GUI::getIsInit()) GUI::shutdown();
+    pfn_mh_disable(MH_ALL_HOOKS);
+    if (p_swap_buffers) pfn_mh_remove(p_swap_buffers);
+    is_init = false;
 }
 
 bool Hook::getIsInit()
 {
-	return is_init;
+    return is_init;
 }
 
 bool __stdcall wglSwapBuffers(HDC hDc)
 {
-	HWND current_wnd = LI_FN(WindowFromDC)(hDc);
-	
-	if (!wnd_handle && current_wnd && LI_FN(IsWindow)(current_wnd))
-	{
-		char current_class[128]{};
-		LI_FN(GetClassNameA)(current_wnd, current_class, sizeof(current_class));
-		
-		const char* target_class = xorstr_("BlueStacksApp");
-		if (std::strcmp(current_class, target_class) == 0)
-		{
-			wnd_handle = current_wnd;
-			g_hwnd = wnd_handle;
-			GUI::init(wnd_handle);
-		}
-	}
-	
-	if (current_wnd == wnd_handle && GUI::getIsInit())
-		GUI::draw();
-	
-	return origin_wglSwapBuffers(hDc);
+    __try
+    {
+        HWND current_wnd = LI_FN(WindowFromDC)(hDc);
+        
+        if (!wnd_handle && current_wnd && LI_FN(IsWindow)(current_wnd))
+        {
+            char current_class[128]{};
+            LI_FN(GetClassNameA)(current_wnd, current_class, sizeof(current_class));
+            
+            const char* target_class = xorstr_("BlueStacksApp");
+            if (std::strcmp(current_class, target_class) == 0)
+            {
+                wnd_handle = current_wnd;
+                g_hwnd = wnd_handle;
+                GUI::init(wnd_handle);
+            }
+        }
+        
+        if (current_wnd == wnd_handle && GUI::getIsInit())
+            GUI::draw();
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        wnd_handle = nullptr;
+    }
+    
+    return origin_wglSwapBuffers(hDc);
 }

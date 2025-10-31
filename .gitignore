@@ -1,0 +1,35 @@
+# Build directories
+/build/
+/out/
+/bin/
+/obj/
+
+# Visual Studio
+/.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# CMake generated
+CMakeCache.txt
+CMakeFiles/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Logs
+*.log
+*.cache
+
+# Libraries
+*.lib
+*.exp
+*.pdb
+
+# Temporary
+*.tmp
+*.temp
+~*
