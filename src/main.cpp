@@ -1,6 +1,7 @@
 #include <thread>
 #include <chrono>
 #include <Windows.h>
+#include <SehCompat.h>
 #include <xostr/xorstr.hpp>
 #include <LazyImporter/lazy_importer.hpp>
 #include "Hook.h"

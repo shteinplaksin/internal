@@ -3,6 +3,7 @@
 #include <LazyImporter/lazy_importer.hpp>
 #include <cstring>
 #include <cctype>
+#include <SehCompat.h>
 
 typedef struct _LDR_MODULE {
     LIST_ENTRY InLoadOrderModuleList;
