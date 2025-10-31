@@ -42,100 +42,100 @@ static PFN_ImplOpenGL3_RenderDrawData pfn_opengl3_render = ImGui_ImplOpenGL3_Ren
 
 bool GUI::init(HWND wnd_handle)
 {
-	if (is_init) return false;
+    if (is_init) return false;
 
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.IniFilename = nullptr;
-	
-	const char* font_path = xorstr_("C:\\Windows\\Fonts\\consola.ttf");
-	ImFont* font = io.Fonts->AddFontFromFileTTF(font_path, 15.0f);
-	io.FontDefault = font ? font : io.Fonts->AddFontDefault();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = nullptr;
+    
+    const char* font_path = xorstr_("C:\\Windows\\Fonts\\consola.ttf");
+    ImFont* font = io.Fonts->AddFontFromFileTTF(font_path, 15.0f);
+    io.FontDefault = font ? font : io.Fonts->AddFontDefault();
 
-	ImGui::StyleColorsDark();
-	applyDarkOrangeTheme();
-	pfn_win32_init(wnd_handle);
-	pfn_opengl3_init(nullptr);
-	is_init = true;
-	return false;
+    ImGui::StyleColorsDark();
+    applyDarkOrangeTheme();
+    pfn_win32_init(wnd_handle);
+    pfn_opengl3_init(nullptr);
+    is_init = true;
+    return false;
 }
 
 void GUI::shutdown()
 {
-	if (!is_init) return;
-	pfn_opengl3_shutdown();
-	pfn_win32_shutdown();
-	ImGui::DestroyContext();
-	is_init = false;
+    if (!is_init) return;
+    pfn_opengl3_shutdown();
+    pfn_win32_shutdown();
+    ImGui::DestroyContext();
+    is_init = false;
 }
 
 void GUI::draw()
 {
-	if (!g_hwnd || !LI_FN(IsWindow)(g_hwnd)) return;
-	
-	static bool insert_was_pressed = false;
-	bool insert_is_pressed = (LI_FN(GetAsyncKeyState)(VK_INSERT) & 0x8000) != 0;
-	if (insert_is_pressed && !insert_was_pressed) do_draw = !do_draw;
-	insert_was_pressed = insert_is_pressed;
-	
-	pfn_opengl3_newframe();
-	ImGuiIO& io = ImGui::GetIO();
-	
-	static LARGE_INTEGER frequency = {0}, last_time = {0};
-	if (frequency.QuadPart == 0)
-	{
-		LI_FN(QueryPerformanceFrequency)(&frequency);
-		LI_FN(QueryPerformanceCounter)(&last_time);
-	}
-	
-	LARGE_INTEGER current_time;
-	LI_FN(QueryPerformanceCounter)(&current_time);
-	io.DeltaTime = (float)(current_time.QuadPart - last_time.QuadPart) / (float)frequency.QuadPart;
-	last_time = current_time;
-	if (io.DeltaTime <= 0.0f || io.DeltaTime > 1.0f) io.DeltaTime = 1.0f / 60.0f;
-	
-	RECT rect;
-	if (LI_FN(GetClientRect)(g_hwnd, &rect))
-	{
-		int width = rect.right - rect.left;
-		int height = rect.bottom - rect.top;
-		if (width > 0 && height > 0)
-			io.DisplaySize = ImVec2((float)width, (float)height);
-	}
-	
-	if (do_draw)
-	{
-		POINT cursor_pos;
-		if (LI_FN(GetCursorPos)(&cursor_pos))
-		{
-			io.MousePos = LI_FN(ScreenToClient)(g_hwnd, &cursor_pos) 
-				? ImVec2((float)cursor_pos.x, (float)cursor_pos.y) 
-				: ImVec2(-FLT_MAX, -FLT_MAX);
-		}
-		
-		int vk_buttons[3] = {VK_LBUTTON, VK_RBUTTON, VK_MBUTTON};
-		for (int i = 0; i < 3; i++)
-			io.MouseDown[i] = (LI_FN(GetAsyncKeyState)(vk_buttons[i]) & 0x8000) != 0;
-		
-		io.KeyCtrl = (LI_FN(GetAsyncKeyState)(VK_CONTROL) & 0x8000) != 0;
-		io.KeyShift = (LI_FN(GetAsyncKeyState)(VK_SHIFT) & 0x8000) != 0;
-		io.KeyAlt = (LI_FN(GetAsyncKeyState)(VK_MENU) & 0x8000) != 0;
-		io.KeySuper = false;
-	}
-	else
-	{
-		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-		memset(io.MouseDown, 0, sizeof(io.MouseDown));
-		io.KeyCtrl = io.KeyShift = io.KeyAlt = io.KeySuper = false;
-	}
-	
-	io.MouseWheel = io.MouseWheelH = 0.0f;
-	
-	ImGui::NewFrame();
-	if (do_draw) renderMainInterface();
-	ImGui::EndFrame();
-	ImGui::Render();
-	pfn_opengl3_render(ImGui::GetDrawData());
+    if (!g_hwnd || !LI_FN(IsWindow)(g_hwnd)) return;
+    
+    static bool insert_was_pressed = false;
+    bool insert_is_pressed = (LI_FN(GetAsyncKeyState)(VK_INSERT) & 0x8000) != 0;
+    if (insert_is_pressed && !insert_was_pressed) do_draw = !do_draw;
+    insert_was_pressed = insert_is_pressed;
+    
+    pfn_opengl3_newframe();
+    ImGuiIO& io = ImGui::GetIO();
+    
+    static LARGE_INTEGER frequency = {0}, last_time = {0};
+    if (frequency.QuadPart == 0)
+    {
+        LI_FN(QueryPerformanceFrequency)(&frequency);
+        LI_FN(QueryPerformanceCounter)(&last_time);
+    }
+    
+    LARGE_INTEGER current_time;
+    LI_FN(QueryPerformanceCounter)(&current_time);
+    io.DeltaTime = (float)(current_time.QuadPart - last_time.QuadPart) / (float)frequency.QuadPart;
+    last_time = current_time;
+    if (io.DeltaTime <= 0.0f || io.DeltaTime > 1.0f) io.DeltaTime = 1.0f / 60.0f;
+    
+    RECT rect;
+    if (LI_FN(GetClientRect)(g_hwnd, &rect))
+    {
+        int width = rect.right - rect.left;
+        int height = rect.bottom - rect.top;
+        if (width > 0 && height > 0)
+            io.DisplaySize = ImVec2((float)width, (float)height);
+    }
+    
+    if (do_draw)
+    {
+        POINT cursor_pos;
+        if (LI_FN(GetCursorPos)(&cursor_pos))
+        {
+            io.MousePos = LI_FN(ScreenToClient)(g_hwnd, &cursor_pos) 
+                ? ImVec2((float)cursor_pos.x, (float)cursor_pos.y) 
+                : ImVec2(-FLT_MAX, -FLT_MAX);
+        }
+        
+        int vk_buttons[3] = {VK_LBUTTON, VK_RBUTTON, VK_MBUTTON};
+        for (int i = 0; i < 3; i++)
+            io.MouseDown[i] = (LI_FN(GetAsyncKeyState)(vk_buttons[i]) & 0x8000) != 0;
+        
+        io.KeyCtrl = (LI_FN(GetAsyncKeyState)(VK_CONTROL) & 0x8000) != 0;
+        io.KeyShift = (LI_FN(GetAsyncKeyState)(VK_SHIFT) & 0x8000) != 0;
+        io.KeyAlt = (LI_FN(GetAsyncKeyState)(VK_MENU) & 0x8000) != 0;
+        io.KeySuper = false;
+    }
+    else
+    {
+        io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+        memset(io.MouseDown, 0, sizeof(io.MouseDown));
+        io.KeyCtrl = io.KeyShift = io.KeyAlt = io.KeySuper = false;
+    }
+    
+    io.MouseWheel = io.MouseWheelH = 0.0f;
+    
+    ImGui::NewFrame();
+    if (do_draw) renderMainInterface();
+    ImGui::EndFrame();
+    ImGui::Render();
+    pfn_opengl3_render(ImGui::GetDrawData());
 }
 
 bool GUI::getIsInit() { return is_init; }
