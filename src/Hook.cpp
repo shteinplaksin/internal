@@ -92,9 +92,13 @@ bool __stdcall wglSwapBuffers(HDC hDc)
         {
             char current_class[128]{};
             LI_FN(GetClassNameA)(current_wnd, current_class, sizeof(current_class));
-            
-            const char* target_class = xorstr_("BlueStacksApp");
-            if (std::strcmp(current_class, target_class) == 0)
+
+            char window_title[256]{};
+            LI_FN(GetWindowTextA)(current_wnd, window_title, sizeof(window_title));
+
+            const char* target_class = xorstr_("SDL_app");
+            const char* target_title = xorstr_("AssaultCube");
+            if (std::strcmp(current_class, target_class) == 0 || std::strstr(window_title, target_title) != nullptr)
             {
                 wnd_handle = current_wnd;
                 g_hwnd = wnd_handle;

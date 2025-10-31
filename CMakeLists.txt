@@ -76,7 +76,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # Подключаем библиотеки
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/libMinHook-x64.lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/libMinHook-x86.lib
     opengl32.lib
 )
 
@@ -148,7 +148,7 @@ message(STATUS "AppModuleCore - Build Configuration")
 message(STATUS "===========================================")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "ImGui Directory: ${IMGUI_DIR}")
-message(STATUS "MinHook Library: ${CMAKE_CURRENT_SOURCE_DIR}/lib/libMinHook-x64.lib")
+message(STATUS "MinHook Library: ${CMAKE_CURRENT_SOURCE_DIR}/lib/libMinHook-x86.lib")
 message(STATUS "Output Directory: ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "===========================================")
 
