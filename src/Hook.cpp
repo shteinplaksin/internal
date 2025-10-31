@@ -3,6 +3,7 @@
 #include <xostr/xorstr.hpp>
 #include <LazyImporter/lazy_importer.hpp>
 #include <cstring>
+#include <SehCompat.h>
 #include "Hook.h"
 #include "UI/GUI.h"
 

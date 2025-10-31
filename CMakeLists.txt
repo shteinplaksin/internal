@@ -48,6 +48,7 @@ set(SOURCES
     src/UI/Config.cpp
     src/UI/Theme.cpp
     src/UI/Tabs.cpp
+    src/features/ESP.cpp
 )
 
 # Заголовочные файлы проекта
@@ -58,6 +59,8 @@ set(HEADERS
     src/UI/Config.h
     src/UI/Theme.h
     src/UI/Tabs.h
+    src/features/ESP.h
+    src/features/Offsets.h
 )
 
 # Создаем DLL библиотеку

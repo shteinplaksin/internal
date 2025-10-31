@@ -1,6 +1,7 @@
 #include "GUI.h"
 #include "Theme.h"
 #include "Tabs.h"
+#include "../features/ESP.h"
 #include <Windows.h>
 #include <xostr/xorstr.hpp>
 #include <LazyImporter/lazy_importer.hpp>
@@ -132,6 +133,7 @@ void GUI::draw()
     io.MouseWheel = io.MouseWheelH = 0.0f;
     
     ImGui::NewFrame();
+    Features::Esp::render();
     if (do_draw) renderMainInterface();
     ImGui::EndFrame();
     ImGui::Render();
